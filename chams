@@ -1,0 +1,82 @@
+-- main_script.lua
+
+-- Define a function to create highlights
+local function createHighlight(plr, FillColor, DepthMode, FillTransparency, OutlineColor, OutlineTransparency, RainbowLine)
+    local CoreGui = game:GetService("CoreGui")
+    local Storage = CoreGui:FindFirstChild("ChamsBB4") or Instance.new("Folder")
+    Storage.Name = "ChamsBB4"
+    Storage.Parent = CoreGui
+
+    local function getRainbowColor()
+        local time = tick()
+        return Color3.fromHSV((time % 5) / 5, 1, 1)
+    end
+
+    local function Highlight(plr)
+        if Storage:FindFirstChild(plr.Name) then
+            Storage[plr.Name]:Destroy()
+        end
+
+        local Highlight = Instance.new("Highlight")
+        Highlight.Name = plr.Name
+        Highlight.FillColor = FillColor
+        Highlight.DepthMode = DepthMode
+        Highlight.FillTransparency = FillTransparency
+        Highlight.OutlineColor = OutlineColor
+        Highlight.OutlineTransparency = OutlineTransparency
+        Highlight.Parent = Storage
+
+        local function updateHighlight(char)
+            while Highlight.Parent do
+                Highlight.Adornee = char
+                if RainbowLine then
+                    Highlight.OutlineColor = getRainbowColor()
+                end
+                task.wait(0.1)
+            end
+        end
+
+        local plrchar = plr.Character
+        if plrchar then
+            task.spawn(updateHighlight, plrchar)
+        end
+    end
+
+    return Highlight
+end
+
+-- Main execution
+local function main(args)
+    local PlayerChams = args.PlayerChams
+    local LocalPlayerChams = args.LocalPlayerChams
+    local RainbowLine = args.RainbowLine
+
+    -- Get services
+    local Players = game:GetService("Players")
+    local lp = Players.LocalPlayer
+    local connections = {}
+
+    -- Apply chams
+    local function applyChams()
+        if PlayerChams then
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr ~= lp then
+                    createHighlight(plr, Color3.fromRGB(154, 215, 255), "AlwaysOnTop", 0.5, Color3.fromRGB(0, 0, 0), 0.4, RainbowLine)
+                end
+            end
+        end
+
+        if LocalPlayerChams then
+            createHighlight(lp, Color3.fromRGB(154, 215, 255), "AlwaysOnTop", 0.5, Color3.fromRGB(0, 0, 0), 0.4, RainbowLine)
+        end
+    end
+
+    applyChams()
+end
+
+-- Execute with arguments
+main({
+    PlayerChams = _G._PlayerChams,
+    LocalPlayerChams = _G._LocalPlayerChams,
+    RainbowLine = _G.RainbowLine
+})
